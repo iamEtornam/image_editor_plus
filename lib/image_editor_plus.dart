@@ -325,7 +325,7 @@ class _MultiImageEditorState extends State<MultiImageEditor> {
                             width: 32,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(60),
+                              color: Theme.of(context).iconTheme.color,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: IconButton(
@@ -349,7 +349,10 @@ class _MultiImageEditorState extends State<MultiImageEditor> {
                               width: 38,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.black.withAlpha(100),
+                                color: Theme.of(context)
+                                    .iconTheme
+                                    .color!
+                                    .withAlpha(100),
                                 borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(19),
                                 ),
@@ -736,7 +739,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
             right: 0,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.25),
+                color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
               ),
               child: SafeArea(
                 child: Row(
@@ -755,7 +758,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                   width: 48,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(100),
+                    color: Theme.of(context).iconTheme.color!.withAlpha(100),
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(19),
                       bottomRight: Radius.circular(19),
@@ -796,7 +799,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                 width: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(100),
+                  color: Theme.of(context).iconTheme.color!.withAlpha(100),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(19),
                     bottomLeft: Radius.circular(19),
@@ -817,12 +820,12 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
           ),
         ]),
         bottomNavigationBar: Container(
-          // color: Colors.black45,
+          // color: Theme.of(context).iconTheme.color45,
           alignment: Alignment.bottomCenter,
           height: 86 + MediaQuery.of(context).padding.bottom,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: const BoxDecoration(
-            color: Colors.black87,
+          decoration: BoxDecoration(
+            color: Theme.of(context).iconTheme.color,
             shape: BoxShape.rectangle,
             //   boxShadow: [
             //     BoxShadow(blurRadius: 1),
@@ -1033,9 +1036,9 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                               builder: (context, setS) {
                                 return SingleChildScrollView(
                                   child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black87,
-                                      borderRadius: BorderRadius.only(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).iconTheme.color,
+                                      borderRadius: const BorderRadius.only(
                                           topRight: Radius.circular(10),
                                           topLeft: Radius.circular(10)),
                                     ),
@@ -1242,7 +1245,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                       onTap: () async {
                         EmojiLayerData? layer = await showModalBottomSheet(
                           context: context,
-                          backgroundColor: Colors.black,
+                          backgroundColor: Theme.of(context).iconTheme.color,
                           builder: (BuildContext context) {
                             return const Emojies();
                           },
@@ -1392,7 +1395,7 @@ class _ImageCropperState extends State<ImageCropper> {
           ],
         ),
         body: Container(
-          color: Colors.black,
+          color: Theme.of(context).iconTheme.color,
           child: ExtendedImage.memory(
             widget.image,
             cacheRawData: true,
@@ -1466,10 +1469,10 @@ class _ImageCropperState extends State<ImageCropper> {
                 // ),
                 Container(
                   height: 80,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black,
+                        color: Theme.of(context).iconTheme.color!,
                         blurRadius: 10,
                       ),
                     ],
@@ -1698,7 +1701,7 @@ class _ImageFiltersState extends State<ImageFilters> {
                               border: Border.all(
                                 color: selectedFilter == filter
                                     ? Colors.white
-                                    : Colors.black,
+                                    : Theme.of(context).iconTheme.color!,
                                 width: 2,
                               ),
                             ),
@@ -1865,9 +1868,9 @@ class ImageEditorDrawing extends StatefulWidget {
 }
 
 class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
-  Color pickerColor = Colors.white,
-      currentColor = Colors.white,
-      currentBackgroundColor = Colors.black;
+  Color pickerColor = Colors.white, currentColor = Colors.white;
+    Color?  currentBackgroundColor;
+
   var screenshotController = ScreenshotController();
 
   final control = HandSignatureControl(
@@ -2030,7 +2033,7 @@ class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
                         return Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.black87,
+                            color: Theme.of(context).iconTheme.color,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(
                                 MediaQuery.of(context).size.width / 2,
