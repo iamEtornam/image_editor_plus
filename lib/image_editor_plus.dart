@@ -2,6 +2,7 @@ library image_editor_plus;
 
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:colorfilter_generator/colorfilter_generator.dart';
 import 'package:colorfilter_generator/presets.dart';
 import 'package:extended_image/extended_image.dart';
@@ -120,28 +121,23 @@ class ImageEditor extends StatelessWidget {
   }
 
   /// Set custom theme properties default is dark theme with white text
-  static ThemeData theme = ThemeData(
-    scaffoldBackgroundColor: Colors.black,
-    colorScheme: const ColorScheme.dark(
-      surface: Colors.black,
-    ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black87,
-      iconTheme: IconThemeData(color: Colors.white),
-      systemOverlayStyle: SystemUiOverlayStyle.light,
-      toolbarTextStyle: TextStyle(color: Colors.white),
-      titleTextStyle: TextStyle(color: Colors.white),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.black,
-    ),
-    iconTheme: const IconThemeData(
-      color: Colors.white,
-    ),
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.white),
-    ),
-  );
+  static ThemeData theme(BuildContext context) => ThemeData(
+        scaffoldBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        colorScheme: Theme.of(context).colorScheme,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          iconTheme: Theme.of(context).iconTheme,
+          systemOverlayStyle:
+              Theme.of(context).colorScheme.brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
+          toolbarTextStyle: Theme.of(context).appBarTheme.toolbarTextStyle,
+          titleTextStyle: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        bottomNavigationBarTheme: Theme.of(context).bottomNavigationBarTheme,
+        iconTheme: Theme.of(context).iconTheme,
+        textTheme: Theme.of(context).textTheme,
+      );
 }
 
 /// Show multiple image carousel to edit multple images at one and allow more images to be added
@@ -210,7 +206,7 @@ class _MultiImageEditorState extends State<MultiImageEditor> {
     viewportSize = MediaQuery.of(context).size;
 
     return Theme(
-      data: ImageEditor.theme,
+      data: ImageEditor.theme(context),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -665,7 +661,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
     // pixelRatio = math.max(heightRatio, widthRatio);
 
     return Theme(
-      data: ImageEditor.theme,
+      data: ImageEditor.theme(context),
       child: Scaffold(
         body: Stack(children: [
           GestureDetector(
@@ -1371,7 +1367,7 @@ class _ImageCropperState extends State<ImageCropper> {
     }
 
     return Theme(
-      data: ImageEditor.theme,
+      data: ImageEditor.theme(context),
       child: Scaffold(
         appBar: AppBar(
           actions: [
@@ -1616,7 +1612,7 @@ class _ImageFiltersState extends State<ImageFilters> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ImageEditor.theme,
+      data: ImageEditor.theme(context),
       child: Scaffold(
         appBar: AppBar(
           actions: [
@@ -1910,7 +1906,7 @@ class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ImageEditor.theme,
+      data: ImageEditor.theme(context),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
