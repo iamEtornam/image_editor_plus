@@ -460,15 +460,78 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
     super.dispose();
   }
 
-  List<Widget> get filterActions {
-    return [
-      const BackButton(),
-      SizedBox(
-        width: MediaQuery.of(context).size.width - 48,
-        child: SingleChildScrollView(
-          reverse: true,
-          scrollDirection: Axis.horizontal,
-          child: Row(children: [
+  @override
+  void initState() {
+    if (widget.image != null) {
+      loadImage(widget.image!);
+    }
+
+    checkPermissions();
+
+    super.initState();
+  }
+
+  double flipValue = 0;
+  int rotateValue = 0;
+
+  double x = 0;
+  double y = 0;
+  double z = 0;
+
+  double lastScaleFactor = 1, scaleFactor = 1;
+  double widthRatio = 1, heightRatio = 1, pixelRatio = 1;
+
+  resetTransformation() {
+    scaleFactor = 1;
+    x = 0;
+    y = 0;
+    setState(() {});
+  }
+
+  /// obtain image Uint8List by merging layers
+  Future<Uint8List?> getMergedImage([
+    o.OutputFormat format = o.OutputFormat.png,
+  ]) async {
+    Uint8List? image;
+
+    if (flipValue != 0 || rotateValue != 0 || layers.length > 1) {
+      image = await screenshotController.capture(pixelRatio: pixelRatio);
+    } else if (layers.length == 1) {
+      if (layers.first is BackgroundLayerData) {
+        image = (layers.first as BackgroundLayerData).image.bytes;
+      } else if (layers.first is ImageLayerData) {
+        image = (layers.first as ImageLayerData).image.bytes;
+      }
+    }
+
+    // conversion for non-png
+    if (image != null && format == o.OutputFormat.jpeg) {
+      var decodedImage = img.decodeImage(image);
+
+      if (decodedImage == null) {
+        throw Exception('Unable to decode image for conversion.');
+      }
+
+      return img.encodeJpg(decodedImage);
+    }
+
+    return image;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    viewportSize = MediaQuery.of(context).size;
+    pixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    // widthRatio = currentImage.width / viewportSize.width;
+    // heightRatio = currentImage.height / viewportSize.height;
+    // pixelRatio = math.max(heightRatio, widthRatio);
+
+    return Theme(
+      data: ImageEditor.theme(context),
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
             IconButton(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               icon: Icon(Icons.undo,
@@ -482,7 +545,9 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                   return;
                 }
 
-                if (layers.length <= 1) return; // do not remove image layer
+                if (layers.length <= 1) {
+                  return; // do not remove image layer
+                }
 
                 undoLayers.add(layers.removeLast());
 
@@ -586,86 +651,12 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
 
                   loadingScreen.hide();
 
-                  if (mounted) Navigator.pop(context, editedImageBytes);
+                  if (context.mounted) Navigator.pop(context, editedImageBytes);
                 }
               },
             ),
-          ]),
+          ],
         ),
-      ),
-    ];
-  }
-
-  @override
-  void initState() {
-    if (widget.image != null) {
-      loadImage(widget.image!);
-    }
-
-    checkPermissions();
-
-    super.initState();
-  }
-
-  double flipValue = 0;
-  int rotateValue = 0;
-
-  double x = 0;
-  double y = 0;
-  double z = 0;
-
-  double lastScaleFactor = 1, scaleFactor = 1;
-  double widthRatio = 1, heightRatio = 1, pixelRatio = 1;
-
-  resetTransformation() {
-    scaleFactor = 1;
-    x = 0;
-    y = 0;
-    setState(() {});
-  }
-
-  /// obtain image Uint8List by merging layers
-  Future<Uint8List?> getMergedImage([
-    o.OutputFormat format = o.OutputFormat.png,
-  ]) async {
-    Uint8List? image;
-
-    if (flipValue != 0 || rotateValue != 0 || layers.length > 1) {
-      image = await screenshotController.capture(pixelRatio: pixelRatio);
-    } else if (layers.length == 1) {
-      if (layers.first is BackgroundLayerData) {
-        image = (layers.first as BackgroundLayerData).image.bytes;
-      } else if (layers.first is ImageLayerData) {
-        image = (layers.first as ImageLayerData).image.bytes;
-      }
-    }
-
-    // conversion for non-png
-    if (image != null && format == o.OutputFormat.jpeg) {
-      var decodedImage = img.decodeImage(image);
-
-      if (decodedImage == null) {
-        throw Exception('Unable to decode image for conversion.');
-      }
-
-      return img.encodeJpg(decodedImage);
-    }
-
-    return image;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    viewportSize = MediaQuery.of(context).size;
-    pixelRatio = MediaQuery.of(context).devicePixelRatio;
-
-    // widthRatio = currentImage.width / viewportSize.width;
-    // heightRatio = currentImage.height / viewportSize.height;
-    // pixelRatio = math.max(heightRatio, widthRatio);
-
-    return Theme(
-      data: ImageEditor.theme(context),
-      child: Scaffold(
         body: Stack(children: [
           GestureDetector(
             onScaleUpdate: (details) {
@@ -729,21 +720,6 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
-              ),
-              child: SafeArea(
-                child: Row(
-                  children: filterActions,
                 ),
               ),
             ),
@@ -825,7 +801,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
           height: 86 + MediaQuery.of(context).padding.bottom,
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: Theme.of(context).iconTheme.color,
+            color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
             shape: BoxShape.rectangle,
             //   boxShadow: [
             //     BoxShadow(blurRadius: 1),
@@ -847,7 +823,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                         var mergedImage = await getMergedImage();
                         loadingScreen.hide();
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
 
                         Uint8List? croppedImage = await Navigator.push(
                           context,
@@ -907,7 +883,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                           var mergedImage = await getMergedImage();
                           loadingScreen.hide();
 
-                          if (!mounted) return;
+                          if (!context.mounted) return;
 
                           var drawing = await Navigator.push(
                             context,
@@ -1206,7 +1182,7 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                         var mergedImage = await getMergedImage();
                         loadingScreen.hide();
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
 
                         Uint8List? filterAppliedImage = await Navigator.push(
                           context,
@@ -1309,7 +1285,7 @@ class BottomButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Colors.white,
+              color: Theme.of(context).iconTheme.color,
             ),
             const SizedBox(height: 8),
             Text(
@@ -1389,7 +1365,7 @@ class _ImageCropperState extends State<ImageCropper> {
                   rect: state.getCropRect()!,
                 );
 
-                if (mounted) Navigator.pop(context, data);
+                if (context.mounted) Navigator.pop(context, data);
               },
             ),
           ],
@@ -1627,7 +1603,7 @@ class _ImageFiltersState extends State<ImageFilters> {
                 var data = await screenshotController.capture();
                 loadingScreen.hide();
 
-                if (mounted) Navigator.pop(context, data);
+                if (context.mounted) Navigator.pop(context, data);
               },
             ),
           ],
@@ -1869,7 +1845,7 @@ class ImageEditorDrawing extends StatefulWidget {
 
 class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
   Color pickerColor = Colors.white, currentColor = Colors.white;
-    Color?  currentBackgroundColor;
+  Color? currentBackgroundColor;
 
   var screenshotController = ScreenshotController();
 
@@ -1966,7 +1942,7 @@ class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
                     width: widget.image.width,
                   );
 
-                  if (!mounted) return;
+                  if (!context.mounted) return;
 
                   return Navigator.pop(context, data!.buffer.asUint8List());
                 }
@@ -1975,7 +1951,7 @@ class _ImageEditorDrawingState extends State<ImageEditorDrawing> {
                 var image = await screenshotController.capture();
                 loadingScreen.hide();
 
-                if (!mounted) return;
+                if (!context.mounted) return;
 
                 return Navigator.pop(context, image);
               },
