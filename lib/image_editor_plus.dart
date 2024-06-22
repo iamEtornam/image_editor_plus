@@ -1518,7 +1518,7 @@ class _ImageCropperState extends State<ImageCropper> {
                                   i18n(ratio.title),
                                   style: TextStyle(
                                     color: currentRatio == ratio.ratio
-                                        ? Theme.of(context).iconTheme.color
+                                        ? Theme.of(context).textTheme.bodyLarge!.color
                                         : Colors.grey,
                                   ),
                                 )),
