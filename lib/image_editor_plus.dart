@@ -1451,9 +1451,10 @@ class _ImageCropperState extends State<ImageCropper> {
                 Container(
                   height: 80,
                   decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).iconTheme.color!,
+                        color: Theme.of(context).cardColor,
                         blurRadius: 10,
                       ),
                     ],
